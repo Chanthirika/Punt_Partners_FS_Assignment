@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Bot</title>
+</head>
+<body>
+    <h1>Voice Bot</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="audio">Upload an audio file (WAV format):</label>
+        <input type="file" id="audio" name="audio" accept=".wav" required>
+        <button type="submit">Submit</button>
+    </form>
+    <audio id="response-audio" controls></audio>
+
+    <script>
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            var formData = new FormData(this);
+
+            fetch('/voice/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' // Optional: To handle AJAX requests
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                var audio = document.getElementById('response-audio');
+                audio.src = URL.createObjectURL(blob);
+                audio.play();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
